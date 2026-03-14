@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FocusFlow 2.0</title>
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --accent: #d8b4fe;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f8fafc;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top left, #1e1b4b, var(--bg));
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .progress-container {
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            height: 10px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+
+        #progressBar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary), #ec4899);
+            transition: width 0.4s ease;
+        }
+
+        .todo-card {
+            background: var(--card);
+            padding: 25px;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .input-group {
+            display: flex;
+            background: #334155;
+            padding: 5px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        input {
+            flex: 1;
+            background: none;
+            border: none;
+            color: white;
+            padding: 12px;
+            outline: none;
+            font-size: 1rem;
+        }
+
+        button#addBtn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        li {
+            background: rgba(255,255,255,0.03);
+            margin-bottom: 10px;
+            padding: 12px 15px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: 0.2s;
+        }
+
+        li:hover { transform: translateX(5px); background: rgba(255,255,255,0.07); }
+
+        .completed { opacity: 0.4; text-decoration: line-through; }
+
+        .quote-box {
+            margin-top: 30px;
+            text-align: center;
+            font-style: italic;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>FocusFlow</h1>
+        <div class="progress-container"><div id="progressBar"></div></div>
+        <small id="stats">0% Completed</small>
+    </div>
+
+    <div class="todo-card">
+        <div class="input-group">
+            <input type="text" id="taskInput" placeholder="What is your main focus?">
+            <button id="addBtn" onclick="addTask()">Focus</button>
+        </div>
+        <ul id="taskList"></ul>
+    </div>
+
+    <div class="quote-box" id="quote">"Small steps lead to big destinations."</div>
+</div>
+
+<script>
+    let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+    function updateUI() {
+        const list = document.getElementById('taskList');
+        list.innerHTML = '';
+        
+        tasks.forEach((task, index) => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <span class="${task.done ? 'completed' : ''}" onclick="toggleTask(${index})">${task.text}</span>
+                <button onclick="deleteTask(${index})" style="background:none; border:none; color:#f87171; cursor:pointer;">✕</button>
+            `;
+            list.appendChild(li);
+        });
+
+        const completedCount = tasks.filter(t => t.done).length;
+        const percent = tasks.length === 0 ? 0 : Math.round((completedCount / tasks.length) * 100);
+        document.getElementById('progressBar').style.width = percent + '%';
+        document.getElementById('stats').innerText = `${percent}% Completed`;
+        
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+
+    function addTask() {
+        const input = document.getElementById('taskInput');
+        if (input.value.trim() === '') return;
+        tasks.push({ text: input.value, done: false });
+        input.value = '';
+        updateUI();
+    }
+
+    function toggleTask(index) {
+        tasks[index].done = !tasks[index].done;
+        updateUI();
+    }
+
+    function deleteTask(index) {
+        tasks.splice(index, 1);
+        updateUI();
+    }
+
+    // Quick Motivation
+    const quotes = [
+        "Action is the foundational key to all success.",
+        "Don't stop until you're proud.",
+        "Focus on being productive, not busy.",
+        "Your future self will thank you."
+    ];
+    document.getElementById('quote').innerText = `"${quotes[Math.floor(Math.random() * quotes.length)]}"`;
+
+    updateUI(); // Load on start
+</script>
+
+</body>
+</html>
